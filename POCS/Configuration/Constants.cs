@@ -18,7 +18,7 @@ namespace Configuration
             var max_capacity = 150;
             var speed = 100;
             Random r = new Random();
-            var shipCount = 5;
+            var shipCount = 10;
             for (int i = 0; i < shipCount; i++) 
             {
                 var shipname = "Ship" + i.ToString();

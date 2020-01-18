@@ -18,7 +18,8 @@ namespace Grains.Grains
             var router = new BrokerRouter(options);
             var client = new Producer(router);
             var response = await client.SendMessageAsync(topic, new List<Message> { msg });
-            Console.WriteLine(response[0].Error);
+            client.Dispose();
+            //Console.WriteLine(response[0].Error);
         }
     }
 }

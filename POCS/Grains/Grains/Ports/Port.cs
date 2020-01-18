@@ -46,7 +46,8 @@ namespace Grains.Grains.Ports
                 var remove = await Task.WhenAll(taskList.ToArray());
                 foreach (var r in remove) 
                 {
-                    if (vessels.Remove(r)) _logger.LogInformation("Success remove from port");
+                    vessels.Remove(r);
+                    //if (vessels.Remove(r)) _logger.LogInformation("Success remove from port");
                 }
                 
             }
@@ -74,7 +75,7 @@ namespace Grains.Grains.Ports
             }
             else 
             {
-                _logger.LogInformation(vesselName+" Waiting");
+                //_logger.LogInformation(vesselName+" Waiting");
                 var i = wait - 1;
                 await vessel.SetTicksToWait(i);
             }
@@ -107,8 +108,8 @@ namespace Grains.Grains.Ports
 
         public Task VesselArrived(string vessel, DateTime time)
         {
-            var log = vessel + " arrived at " + time.ToString();
-            _logger.LogInformation(log);
+            //var log = vessel + " arrived at " + time.ToString();
+            //_logger.LogInformation(log);
             vessels.Add(vessel);
             var r = new Random();
             //var stayInPortTicks = r.Next(Configuration.Constants.MinStayInPortTick, Configuration.Constants.MaxStayInPortTick);

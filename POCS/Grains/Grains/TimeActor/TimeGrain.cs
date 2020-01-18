@@ -117,7 +117,7 @@ namespace Grains.Grains.TimeActor
             }
 
 
-            logger.LogInformation("Tick time: " + t.Elapsed.ToString());
+            //logger.LogInformation("Tick time: " + t.Elapsed.ToString());
             return true;
         }
 

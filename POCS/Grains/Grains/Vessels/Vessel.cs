@@ -86,7 +86,7 @@ namespace Grains.Grains.Vessels
             i.Company = company;
             var obj = JsonConvert.SerializeObject(i);
             await new KafkaProducer().SendToKafka(obj, "alloc");
-            _logger.LogInformation(obj);
+            //_logger.LogInformation(obj);
         }
 
         public async Task<int> GetTicksToWait()

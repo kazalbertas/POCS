@@ -89,7 +89,8 @@ namespace Grains.Grains.Route
 
                 foreach (var r in remove) 
                 {
-                    if (vessels.Remove(r)) _logger.LogInformation("Success REMOVE FROM ROUTE");
+                    vessels.Remove(r);
+                    //if (vessels.Remove(r)) _logger.LogInformation("Success REMOVE FROM ROUTE");
                 }
             }
 
@@ -98,7 +99,7 @@ namespace Grains.Grains.Route
 
         private async Task<string> VesselDistanceCheck(int v, string vesselName, DateTime ts) 
         {
-            _logger.LogInformation("Vessel " + vesselName + " on route from:" + _portA + " to: " + _portB + " ROUTE_ID" + _name);
+            //_logger.LogInformation("Vessel " + vesselName + " on route from:" + _portA + " to: " + _portB + " ROUTE_ID" + _name);
             if ( v >= _distance)
             {
                 var p = GrainFactory.GetGrain<IPort>(_portB);
@@ -112,7 +113,7 @@ namespace Grains.Grains.Route
         {
             vessels.Add(vessel);
             //await KafkaProducer.SendToKafka(("Vessel " + vessel + " departed at " + ts.ToString()), "depart");
-            _logger.LogInformation("Vessel " + vessel + " departed at " + ts.ToString());
+            //_logger.LogInformation("Vessel " + vessel + " departed at " + ts.ToString());
             //return Task.CompletedTask;
         }
     }
