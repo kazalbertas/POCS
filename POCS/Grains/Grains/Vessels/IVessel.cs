@@ -14,11 +14,16 @@ namespace Grains.Grains.Vessels
         Task ResetDistanceOnRoute();
         Task<int> GetDistanceOnRoute();
 
-        Task Depart(string r, DateTime time);
+        Task Depart(DateTime time);
+        Task SetRoute(string route);
         Task SetAll(string name, int capacity, int speed);
 
         Task<int> GetCapacity();
 
-        Task AddAllocationToVessel(int allocation, string company);
+        Task<int> GetTicksToWait();
+
+        Task SetTicksToWait(int ticks);
+
+        Task AddAllocationToVessel(int allocation, string company, DateTime ts);
     }
 }

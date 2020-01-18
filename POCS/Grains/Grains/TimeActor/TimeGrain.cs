@@ -10,6 +10,9 @@ using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
 using System.Linq;
+using System.Timers;
+using System.Diagnostics;
+using System.IO;
 
 namespace Grains.Grains.TimeActor
 {
@@ -40,7 +43,7 @@ namespace Grains.Grains.TimeActor
             {
                 var v = GrainFactory.GetGrain<IVessel>(vessel.VesselName);
                 var t = v.SetAll(vessel.VesselName, vessel.Capacity, vessel.Speed);
-                //actors.Add(v);
+                
                 vesselActors.Add(vessel.VesselName);
                 taskList.Add(t);
             }
@@ -49,7 +52,7 @@ namespace Grains.Grains.TimeActor
             {
                 var r = GrainFactory.GetGrain<IRoute>(route.RouteId);
                 var t = r.SetAll(route.RouteId,route.SourcePortId,route.DestinationPortId,route.Distance);
-                //actors.Add(r);
+                
                 routeActors.Add(route.RouteId);
                 taskList.Add(t);
 
@@ -60,7 +63,7 @@ namespace Grains.Grains.TimeActor
                 var p = GrainFactory.GetGrain<IPort>(port.PortId);
                 var routes = Constants.Routes.Where(x => x.SourcePortId == port.PortId).Select(x=>x.RouteId).ToList();
                 var t = p.SetAll(port.PortId,port.Intake,routes,port.startingVessels);
-                //actors.Add(p);
+                
                 portActors.Add(port.PortId);
                 taskList.Add(t);
             }
@@ -70,6 +73,8 @@ namespace Grains.Grains.TimeActor
 
         public async Task<bool> NextTick()
         {
+            Stopwatch t = new Stopwatch();
+            t.Start();
             var tasks = new List<Task<bool>>();
             foreach (var actor in vesselActors) 
             {
@@ -88,7 +93,7 @@ namespace Grains.Grains.TimeActor
                 tasks.Add(r);
 
             }
-             results = await Task.WhenAll(tasks.ToArray());
+            results = await Task.WhenAll(tasks.ToArray());
 
             tasks = new List<Task<bool>>();
             foreach (var actor in portActors)
@@ -100,9 +105,19 @@ namespace Grains.Grains.TimeActor
             }
             results = await Task.WhenAll(tasks.ToArray());
 
-            logger.LogInformation("//////////////////////////////////////////////////////////////////////////////////////");
             OldTimeStamp = OldTimeStamp.AddSeconds(Constants.TickSizeSeconds);
             NewTimeStamp = NewTimeStamp.AddSeconds(Constants.TickSizeSeconds);
+            t.Stop();
+
+
+
+            using (StreamWriter w = File.AppendText("result.txt"))
+            {
+                w.WriteLine(t.ElapsedMilliseconds);
+            }
+
+
+            logger.LogInformation("Tick time: " + t.Elapsed.ToString());
             return true;
         }
 

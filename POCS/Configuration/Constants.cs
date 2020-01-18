@@ -13,30 +13,71 @@ namespace Configuration
         }
         
         static Constants()
-        { 
-            //Load configuration from files.
+        {
+            var min_capacity = 30;
+            var max_capacity = 150;
+            var speed = 100;
+            Random r = new Random();
+            var shipCount = 5;
+            for (int i = 0; i < shipCount; i++) 
+            {
+                var shipname = "Ship" + i.ToString();
+                
+                var capacity = r.Next(min_capacity, max_capacity);
+                Vessels.Add(new VesselConfig(shipname, capacity, speed));
+            }
+            var currentPortId = 0;
+            var portCount = PortIds.Count;
+            for (int i = 0; i< shipCount; i++) 
+            {
+                var shipname = "Ship" + i.ToString();
+                if (portCount == currentPortId) 
+                {
+                    currentPortId = 0;
+                }
+                PortIds[currentPortId].startingVessels.Add(shipname);
+            }
+            //or load configuration from files.
         }
 
         public static string TimeActorId { get; } = "TimeActorId";
 
         public static int TickSizeSeconds { get; } = 60 * 60;
 
+        public static int MinStayInPortTick { get; set; } = 10;
+        public static int MaxStayInPortTick { get; set; } = 20;
+
         public static List<VesselConfig> Vessels { get; } = new List<VesselConfig>() 
         {
-            new VesselConfig("Ship1",100,100),
-            new VesselConfig("Ship2",100,50),
-            new VesselConfig("Ship3",100,75),
-            new VesselConfig("Ship4",100,30),
-            new VesselConfig("Ship5",100,150)
+           // new VesselConfig("Ship1",100,100),
+            //new VesselConfig("Ship2",100,50),
+            //new VesselConfig("Ship3",100,75),
+           // new VesselConfig("Ship4",100,30),
+           // new VesselConfig("Ship5",100,150)
         };
 
         public static List<PortConfig> PortIds { get; } = new List<PortConfig>()
         {
-            new PortConfig("Port1",150,new List<string>(){ "Ship1" }),
-            new PortConfig("Port2",150,new List<string>(){ "Ship2" }),
-            new PortConfig("Port3",100,new List<string>(){ "Ship3" }),
-            new PortConfig("Port4",100,new List<string>(){ "Ship4" }),
-            new PortConfig("Port5",100,new List<string>(){ "Ship5" })
+            new PortConfig("Port1",150,new List<string>()
+            { 
+                //"Ship1" 
+            }),
+            new PortConfig("Port2",150,new List<string>()
+            { 
+                //"Ship2" 
+            }),
+            new PortConfig("Port3",100,new List<string>()
+            { 
+                //"Ship3" 
+            }),
+            new PortConfig("Port4",100,new List<string>()
+            { 
+            //    "Ship4" 
+            }),
+            new PortConfig("Port5",100,new List<string>()
+            { 
+            //    "Ship5" 
+            })
         };
 
         public static List<RouteConfig> Routes { get; } = new List<RouteConfig>

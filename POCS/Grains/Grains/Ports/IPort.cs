@@ -9,7 +9,6 @@ namespace Grains.Grains.Ports
 {
     public interface IPort : IGrainWithStringKey, ITick
     {
-        //string Name { get; set; }
         Task<string> GetName();
         Task SetName();
         Task SetAll(string name, int intake, List<string> routes, List<string> startingVessels);

@@ -1,7 +1,9 @@
-﻿using Grains.Grains.Route;
+﻿using Grains.Grains.Messages;
+using Grains.Grains.Route;
 using Grains.Grains.TimeActor;
 using Grains.Grains.Vessels;
 using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
 using Orleans;
 using System;
 using System.Collections.Generic;
@@ -54,12 +56,30 @@ namespace Grains.Grains.Ports
 
         private async Task<string> Depart(IVessel vessel, string vesselName, DateTime ts) 
         {
-            var r = new Random();
-            int routeIndex = r.Next(0, routes.Count-1);
-            AssignAllocationAsync(vessel);
-            await vessel.Depart(routes[routeIndex], ts);
-            await vessel.ResetDistanceOnRoute();
-            return vesselName;
+            var wait = await vessel.GetTicksToWait();
+            if (wait == 0)
+            {
+                var r = new Random();
+                int routeIndex = r.Next(0, routes.Count - 1);
+                await vessel.SetRoute(routes[routeIndex]);
+                AssignAllocationAsync(vessel, ts);
+                var obj = new IntakeEventModel();
+                obj.VesselCode = vesselName;
+                obj.DepartureDate = ts;
+                obj.Intake = await vessel.GetCapacity();
+                await new KafkaProducer().SendToKafka(JsonConvert.SerializeObject(obj), "intake");
+                await vessel.Depart(ts);
+                await vessel.ResetDistanceOnRoute();
+                return vesselName;
+            }
+            else 
+            {
+                _logger.LogInformation(vesselName+" Waiting");
+                var i = wait - 1;
+                await vessel.SetTicksToWait(i);
+            }
+
+            return "";
         }
 
         
@@ -68,7 +88,7 @@ namespace Grains.Grains.Ports
             _logger = logger;
         }
 
-        public async Task AssignAllocationAsync(IVessel v) 
+        public async Task AssignAllocationAsync(IVessel v, DateTime ts) 
         {
             int capacity = await v.GetCapacity();
             var r = new Random();
@@ -81,7 +101,7 @@ namespace Grains.Grains.Ports
             foreach (var c in companies) 
             {
                 var a = (int)Math.Round(capacity * percentagePerCompany);
-                await v.AddAllocationToVessel(a,c);
+                await v.AddAllocationToVessel(a,c,ts);
             }
         }
 
@@ -90,6 +110,10 @@ namespace Grains.Grains.Ports
             var log = vessel + " arrived at " + time.ToString();
             _logger.LogInformation(log);
             vessels.Add(vessel);
+            var r = new Random();
+            //var stayInPortTicks = r.Next(Configuration.Constants.MinStayInPortTick, Configuration.Constants.MaxStayInPortTick);
+            var stayInPortTicks = 1;
+            GrainFactory.GetGrain<IVessel>(vessel).SetTicksToWait(stayInPortTicks);
             return Task.CompletedTask;
         }
 

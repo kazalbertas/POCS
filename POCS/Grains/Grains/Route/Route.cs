@@ -108,11 +108,12 @@ namespace Grains.Grains.Route
             return "";
         }
 
-        public Task AddVessel(string vessel,DateTime ts)
+        public async Task AddVessel(string vessel,DateTime ts)
         {
             vessels.Add(vessel);
+            //await KafkaProducer.SendToKafka(("Vessel " + vessel + " departed at " + ts.ToString()), "depart");
             _logger.LogInformation("Vessel " + vessel + " departed at " + ts.ToString());
-            return Task.CompletedTask;
+            //return Task.CompletedTask;
         }
     }
 }

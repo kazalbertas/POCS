@@ -65,13 +65,14 @@ namespace Client
 
             await c.InitialiseSimulation(DateTime.Now);
             // example of calling grains from the initialized client
-            for (var i = 0; i < 10; i++)
+            //for (var i = 0; i < 10; i++)
+            while(true)
             {
                 
                 var response = await c.NextTick();
 
                 Console.WriteLine("\n\n{0}\n\n", response);
-                Thread.Sleep(5000);
+                //Thread.Sleep(1000);
             }
 
         }

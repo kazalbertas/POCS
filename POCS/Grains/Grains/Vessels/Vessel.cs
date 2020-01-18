@@ -1,7 +1,9 @@
 ﻿using Configuration;
+using Grains.Grains.Messages;
 using Grains.Grains.Route;
 using Grains.Grains.TimeActor;
 using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
 using Orleans;
 using System;
 using System.Collections.Generic;
@@ -21,17 +23,22 @@ namespace Grains.Grains.Vessels
 
         private string VesselName { get; set; }
         private int Capacity { get; set; }
+        private int Intake { get; set; }
+        private int TicksToWait { get; set; }
+
         //private List<Container> containers = new List<Containers>();
         private int Speed { get; set; }
         private int DistanceTraveledOnRoute { get; set; } = 0;
         private string Route { get; set; } = "";
         public List<(string, int)> companyAlloc = new List<(string, int)>();
 
-        public async Task Depart(string route, DateTime time)
+        public async Task SetRoute(string route) 
         {
-
-            //TODO: WRITE COMMENTS FOR CODE!
             Route = route;
+        }
+
+        public async Task Depart(DateTime time)
+        {
             var r = GrainFactory.GetGrain<IRoute>(Route);
             await r.AddVessel(VesselName,time);
         }
@@ -69,12 +76,27 @@ namespace Grains.Grains.Vessels
             return Task.CompletedTask;
         }
 
-        public Task AddAllocationToVessel(int allocation, string company)
+        public async Task AddAllocationToVessel(int allocation, string company, DateTime ts)
         {
             companyAlloc.Add((company, allocation));
-            var r = company + " allocated " + allocation + " tons";
-            _logger.LogInformation(r);
-            return Task.CompletedTask;
+            var i = new AllocationModel();
+            i.Allocation = allocation;
+            i.VesselCode = VesselName;
+            i.DepartureDate = ts;
+            i.Company = company;
+            var obj = JsonConvert.SerializeObject(i);
+            await new KafkaProducer().SendToKafka(obj, "alloc");
+            _logger.LogInformation(obj);
+        }
+
+        public async Task<int> GetTicksToWait()
+        {
+            return TicksToWait;
+        }
+
+        public async Task SetTicksToWait(int ticks)
+        {
+            TicksToWait = ticks;
         }
     }
 }
